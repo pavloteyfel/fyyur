@@ -3,14 +3,13 @@
 #----------------------------------------------------------------------------#
 
 from flask import Flask, render_template, request, flash, redirect, url_for
+from forms import ArtistForm, VenueForm, ShowForm
+from sqlalchemy.ext.hybrid import hybrid_property
 from logging import Formatter, FileHandler
 from flask_moment import Moment
 from flask_wtf import Form
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import object_session
 from datetime import datetime
-from forms import *
 
 import dateutil.parser
 import logging
@@ -46,12 +45,12 @@ class Venue(db.Model):
 
   @hybrid_property
   def upcoming_shows(self):
-    return [show for show in self.shows if show.start_time > datetime.now()]
+    return [show for show in self.shows if show._start_time > datetime.now()]
 
 
   @hybrid_property
   def past_shows(self):
-    return [show for show in self.shows if show.start_time < datetime.now()]
+    return [show for show in self.shows if show._start_time < datetime.now()]
 
 
   @hybrid_property
@@ -62,15 +61,6 @@ class Venue(db.Model):
   @hybrid_property
   def past_shows_count(self):
     return len(self.past_shows)
-
-
-  def get_data(self):
-    data = self.__dict__
-    data['upcoming_shows'] = [show.get_artist_data() for show in self.upcoming_shows]
-    data['past_shows'] = [show.get_artist_data() for show in self.past_shows]
-    data['upcoming_shows_count'] = self.upcoming_shows_count
-    data['past_shows_count'] = self.past_shows_count
-    return data
 
 
   def __repr__(self):
@@ -96,12 +86,12 @@ class Artist(db.Model):
 
   @hybrid_property
   def upcoming_shows(self):
-    return [show for show in self.shows if show.start_time > datetime.now()]
+    return [show for show in self.shows if show._start_time > datetime.now()]
 
 
   @hybrid_property
   def past_shows(self):
-    return [show for show in self.shows if show.start_time < datetime.now()]
+    return [show for show in self.shows if show._start_time < datetime.now()]
 
 
   @hybrid_property
@@ -114,15 +104,6 @@ class Artist(db.Model):
     return len(self.past_shows)
 
 
-  def get_data(self):
-    data = self.__dict__
-    data['upcoming_shows'] = [show.get_venue_data() for show in self.upcoming_shows]
-    data['past_shows'] = [show.get_venue_data() for show in self.past_shows]
-    data['upcoming_shows_count'] = self.upcoming_shows_count
-    data['past_shows_count'] = self.past_shows_count
-    return data
-
-
   def __repr__(self):
     return f'<Artist {self.id}, {self.name}>'
 
@@ -133,42 +114,24 @@ class Show(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
   venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-  start_time = db.Column(db.DateTime, nullable=False)
+  _start_time = db.Column(db.DateTime, nullable=False)
   artist = db.relationship('Artist', back_populates='shows')
   venue = db.relationship('Venue', back_populates='shows')
 
-
-  def get_artist_data(self):
-    return {
-      'artist_id': self.venue.id,
-      'artist_name': self.venue.name,
-      'artist_image_link': self.venue.image_link,
-      'start_time': self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-    }
-
-
-  def get_venue_data(self):
-    return {
-      'venue_id': self.venue.id,
-      'venue_name': self.venue.name,
-      'venue_image_link': self.venue.image_link,
-      'start_time': self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-    }
+  @hybrid_property
+  def start_time(self):
+    return self._start_time.strftime('%Y-%m-%d %H:%M:%S')
 
 
   def __repr__(self):
     return f'<Show {self.id}, Artist {self.artist_id}, Venue {self.venue_id}>'
 
+
 def populate():
   import workbench
   db.drop_all()
   db.create_all()
-  # a = Artist(**workbench.artist)
-  # v = Venue(**workbench.venue)
-  # s = Show(**workbench.show)
-  # db.session.add(a)
-  # db.session.add(v)
-  # db.session.add(s)
+
   for artist in workbench.artists:
     a = Artist(**artist)
     db.session.add(a)
@@ -250,14 +213,13 @@ def search_venues():
       "num_upcoming_shows": 0,
     }]
   }
-  return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+  return render_template('pages/search_venues.html', 
+    results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
-  venue = Venue.query.get(venue_id)
-  return render_template('pages/show_venue.html', venue=venue.get_data())
+  return render_template('pages/show_venue.html', 
+    venue=Venue.query.get(venue_id))
 
 #  Create Venue
 #  ----------------------------------------------------------------
@@ -292,18 +254,8 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-  # TODO: replace with real data returned from querying the database
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
-  return render_template('pages/artists.html', artists=data)
+  return render_template('pages/artists.html', 
+    artists=Artist.query.all())
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
@@ -322,10 +274,8 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-  # shows the artist page with the given artist_id
-  # TODO: replace with real artist data from the artist table, using artist_id
-  artist = Artist.query.get(artist_id)
-  return render_template('pages/show_artist.html', artist=artist.get_data())
+  return render_template('pages/show_artist.html', 
+    artist=Artist.query.get(artist_id))
 
 #  Update
 #  ----------------------------------------------------------------
@@ -407,45 +357,7 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
-  # displays list of shows at /shows
-  # TODO: replace with real venues data.
-  data=[{
-    "venue_id": 1,
-    "venue_name": "The Musical Hop",
-    "artist_id": 4,
-    "artist_name": "Guns N Petals",
-    "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-    "start_time": "2019-05-21T21:30:00.000Z"
-  }, {
-    "venue_id": 3,
-    "venue_name": "Park Square Live Music & Coffee",
-    "artist_id": 5,
-    "artist_name": "Matt Quevedo",
-    "artist_image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-    "start_time": "2019-06-15T23:00:00.000Z"
-  }, {
-    "venue_id": 3,
-    "venue_name": "Park Square Live Music & Coffee",
-    "artist_id": 6,
-    "artist_name": "The Wild Sax Band",
-    "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-    "start_time": "2035-04-01T20:00:00.000Z"
-  }, {
-    "venue_id": 3,
-    "venue_name": "Park Square Live Music & Coffee",
-    "artist_id": 6,
-    "artist_name": "The Wild Sax Band",
-    "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-    "start_time": "2035-04-08T20:00:00.000Z"
-  }, {
-    "venue_id": 3,
-    "venue_name": "Park Square Live Music & Coffee",
-    "artist_id": 6,
-    "artist_name": "The Wild Sax Band",
-    "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-    "start_time": "2035-04-15T20:00:00.000Z"
-  }]
-  return render_template('pages/shows.html', shows=data)
+  return render_template('pages/shows.html', shows=Show.query.all())
 
 @app.route('/shows/create')
 def create_shows():
