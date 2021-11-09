@@ -80,7 +80,13 @@ states = [
     ('WY', 'WY'),
 ]
 
-class ShowForm(Form):
+class FormToDict:
+    def to_dict(self):
+        return {field:getattr(getattr(self, field), 'data') 
+            for field in dict(self._fields).keys()}
+
+
+class ShowForm(Form, FormToDict):
     artist_id = StringField(
         'artist_id'
     )
@@ -94,7 +100,7 @@ class ShowForm(Form):
     )
 
 
-class VenueForm(Form):
+class VenueForm(Form, FormToDict):
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -121,18 +127,18 @@ class VenueForm(Form):
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
-    website_link = StringField(
-        'website_link', validators=[URL()]
+    website = StringField(
+        'website', validators=[URL()]
     )
-
-    seeking_talent = BooleanField( 'seeking_talent' )
-
+    seeking_talent = BooleanField( 
+        'seeking_talent' 
+    )
     seeking_description = StringField(
         'seeking_description'
     )
 
 
-class ArtistForm(Form):
+class ArtistForm(Form, FormToDict):
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -157,13 +163,12 @@ class ArtistForm(Form):
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
      )
-
-    website_link = StringField(
-        'website_link', validators=[URL()]
+    website = StringField(
+        'website', validators=[URL()]
      )
-
-    seeking_venue = BooleanField( 'seeking_venue' )
-
+    seeking_venue = BooleanField( 
+        'seeking_venue' 
+    )
     seeking_description = StringField(
-            'seeking_description'
+        'seeking_description'
      )
