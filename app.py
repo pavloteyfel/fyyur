@@ -109,21 +109,40 @@ def create_venue_submission():
 
   return render_template('pages/home.html')
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<venue_id>', methods=['POST'])
 def delete_venue(venue_id):
-  # try:
-  #   venue = Venue.query.get(venue_id)
-  #   db.session.delete(venue)
-  #   db.session.commit()
-  #   flash(f"Venue {request.form['name']} was successfully deleted!")
-  # except Exception as e:
-  #   print(e)
-  #   flash(f"An error occurred. Venue {request.form['name']} could not be deleted.")
+  venue = Venue.query.get_or_404(venue_id)
 
-  #   db.session.rollback()
-  # finally:
-  #   db.session.close()
+  try:
+    db.session.delete(venue)
+    db.session.commit()
+    flash(f'Venue {venue.name} was successfully deleted!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Venue {venue.name} could not be deleted.')
+    db.session.rollback()
+  finally:
+    db.session.close()
+
   return redirect(url_for('index'))
+
+@app.route('/artists/<artist_id>', methods=['POST'])
+def delete_artist(artist_id):
+  artist = Artist.query.get_or_404(artist_id)
+
+  try:
+    db.session.delete(artist)
+    db.session.commit()
+    flash(f'Artist {artist.name} was successfully deleted!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Artist {artist.name} could not be deleted.')
+    db.session.rollback()
+  finally:
+    db.session.close()
+
+  return redirect(url_for('index'))
+
 
 #  Artists
 #  ----------------------------------------------------------------
