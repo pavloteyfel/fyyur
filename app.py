@@ -1,20 +1,13 @@
-#----------------------------------------------------------------------------#
-# Imports
-#----------------------------------------------------------------------------#
-
 from flask import Flask, render_template, request, flash, redirect, url_for
 from forms import ArtistForm, VenueForm, ShowForm
-from sqlalchemy.ext.hybrid import hybrid_property
 from logging import Formatter, FileHandler
+from model import db, Artist, Venue, Show
 from flask_moment import Moment
-from flask_wtf import Form
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 import dateutil.parser
 import logging
 import babel
-import json
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -22,148 +15,7 @@ import json
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
-
-
-class Venue(db.Model):
-  __tablename__ = 'Venue'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(120), nullable=False)
-  city = db.Column(db.String(120), nullable=False)
-  state = db.Column(db.String(120), nullable=False)
-  address = db.Column(db.String(120), nullable=False)
-  phone = db.Column(db.String(120))
-  genres = db.Column(db.ARRAY(db.String(500)), nullable=False)
-  facebook_link = db.Column(db.String(500))
-  image_link = db.Column(db.String(500))
-  website = db.Column(db.String(500))
-  seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
-  seeking_description = db.Column(db.String(500))
-  shows = db.relationship('Show', back_populates='venue', 
-    cascade='all, delete', lazy='joined')
-
-
-  @hybrid_property
-  def upcoming_shows(self):
-    return [show for show in self.shows if show._start_time > datetime.now()]
-
-
-  @hybrid_property
-  def past_shows(self):
-    return [show for show in self.shows if show._start_time < datetime.now()]
-
-
-  @hybrid_property
-  def upcoming_shows_count(self):
-    return len(self.upcoming_shows)
-
-
-  @hybrid_property
-  def past_shows_count(self):
-    return len(self.past_shows)
-
-
-  def update(self, data):
-    for key, value in data.items():
-      setattr(self, key, value)
-
-  
-  def __repr__(self):
-      return f'<Venue {self.id}, {self.name}>'
-
-
-class Artist(db.Model):
-  __tablename__ = 'Artist'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(120), nullable=False)
-  city = db.Column(db.String(120), nullable=False)
-  state = db.Column(db.String(120), nullable=False)
-  phone = db.Column(db.String(120))
-  genres = db.Column(db.ARRAY(db.String(500)), nullable=False)
-  facebook_link = db.Column(db.String(500))
-  image_link = db.Column(db.String(500))
-  website = db.Column(db.String(500))
-  seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
-  seeking_description = db.Column(db.String(500))
-  shows = db.relationship('Show', back_populates='artist',
-    cascade='all, delete', lazy='joined')
-
-
-  @hybrid_property
-  def upcoming_shows(self):
-    return [show for show in self.shows if show._start_time > datetime.now()]
-
-
-  @hybrid_property
-  def past_shows(self):
-    return [show for show in self.shows if show._start_time < datetime.now()]
-
-
-  @hybrid_property
-  def upcoming_shows_count(self):
-    return len(self.upcoming_shows)
-
-
-  @hybrid_property
-  def past_shows_count(self):
-    return len(self.past_shows)
-
-
-  def update(self, data):
-    for key, value in data.items():
-      setattr(self, key, value)
-
-
-  def __repr__(self):
-    return f'<Artist {self.id}, {self.name}>'
-
-
-class Show(db.Model):
-  __tablename__ = 'Show'
-
-  id = db.Column(db.Integer, primary_key=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-  _start_time = db.Column(db.DateTime, nullable=False)
-  artist = db.relationship('Artist', back_populates='shows')
-  venue = db.relationship('Venue', back_populates='shows')
-
-
-  @property
-  def start_time(self):
-    return self._start_time.strftime('%Y-%m-%d %H:%M:%S')
-
-
-  @start_time.setter
-  def start_time(self, value):
-    self._start_time = value
-
-
-  def __repr__(self):
-    return f'<Show {self.id}, Artist {self.artist_id}, Venue {self.venue_id}>'
-
-
-def populate():
-  import workbench
-  db.drop_all()
-  db.create_all()
-
-  for artist in workbench.artists:
-    a = Artist(**artist)
-    db.session.add(a)
-
-  for venue in workbench.venues:
-    v = Venue(**venue)
-    db.session.add(v)
-
-  for show in workbench.shows:
-    s = Show(**show)
-    db.session.add(s)
-
-  db.session.commit()
-  db.session.close()
+db.init_app(app)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -235,18 +87,26 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  try:
-    # new_venue.html: website_link renamed website to be consistent
-    venue = Venue()
-    VenueForm(request.form).populate_obj(venue)
-    db.session.add(venue)
-    db.session.commit()
-    flash(f"Venue {request.form['name']} was successfully listed!")
-  except Exception as e:
-    print(e)
-    flash(f"An error occurred. Venue {request.form['name']} could not be listed.")
-  finally:
-    db.session.close()
+  form = VenueForm(request.form)
+  if form.validate():
+    try:
+      # new_venue.html: website_link renamed website to be consistent
+      venue = Venue()
+      form.populate_obj(venue)
+      db.session.add(venue)
+      db.session.commit()
+      flash(f'Venue {form.name.data} was successfully listed!')
+    except Exception as error:
+      flash(f'An error occurred. Venue {form.name.data} could not be listed.')
+      print(error)
+      db.session.rollback()
+    finally:
+      db.session.close()
+  else:
+      message = []
+      for field, err in form.errors.items():
+          message.append(field + ' ' + '|'.join(err))
+      flash('Errors ' + str(message))
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -293,7 +153,7 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   artist = Artist.query.get(artist_id)
-  form = ArtistForm(**vars(artist))
+  form = ArtistForm(obj=artist)
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -313,7 +173,7 @@ def edit_artist_submission(artist_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   venue = Venue.query.get(venue_id)
-  form = VenueForm(**vars(venue))
+  form = VenueForm(obj=venue)
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])

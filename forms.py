@@ -1,7 +1,7 @@
 from datetime import datetime
-from flask_wtf import Form
+from flask_wtf import Form, FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Optional
 
 
 # read this: https://knowledge.udacity.com/questions/509897
@@ -86,9 +86,10 @@ states = [
 ]
 
 
-def validate_phone(form, field):
-    if not re.search(r'^[1-9]\d{2}-\d{3}-\d{4}$', field.data):
-        raise ValidationError("error: Phone number should only contain digits (xxx-xxx-xxxx)")
+def is_valid_phone(number):
+    regex = re.compile('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
+    return regex.match(number)
+
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -119,20 +120,20 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone', validators=[DataRequired(), validate_phone]
+        'phone', validators=[DataRequired()]
     )
     image_link = StringField(
-        'image_link', validators=[URL()]
+        'image_link', validators=[URL(), Optional()]
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
         choices=genres
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[URL(), Optional()]
     )
     website = StringField(
-        'website', validators=[URL()]
+        'website', validators=[URL(), Optional()]
     )
     seeking_talent = BooleanField( 
         'seeking_talent' 
@@ -140,6 +141,15 @@ class VenueForm(Form):
     seeking_description = StringField(
         'seeking_description'
     )
+
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+        if not is_valid_phone(self.phone.data):
+            self.phone.errors.append('Invalid phone.')
+            return False
+        return True
 
 
 class ArtistForm(Form):
