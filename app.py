@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from forms import ArtistForm, VenueForm, ShowForm
 from logging import Formatter, FileHandler
 from model import db, Artist, Venue, Show
+from flask_migrate import Migrate, migrate
 from flask_moment import Moment
 
 import dateutil.parser
@@ -16,6 +17,7 @@ app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
 db.init_app(app)
+migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -111,7 +113,7 @@ def create_venue_submission():
   finally:
     db.session.close()
 
-  return render_template('pages/home.html')
+  return redirect(url_for('index'))
 
 #----------------------------------------------------------------------------#
 #  Delete Venue
@@ -224,7 +226,7 @@ def create_artist_submission():
     db.session.rollback()
   finally:
     db.session.close()
-  return render_template('pages/home.html')
+  return redirect(url_for('index'))
 
 #----------------------------------------------------------------------------#
 #  Delete Artist
@@ -322,7 +324,7 @@ def create_show_submission():
   finally:
     db.session.close()
 
-  return render_template('pages/home.html')
+  return redirect(url_for('index'))
 
 #----------------------------------------------------------------------------#
 #  Error pages
