@@ -6,3 +6,4 @@ error.log
 workbench.py
 todo.md
 error.log
+migrations/__pycache__/*
