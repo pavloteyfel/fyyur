@@ -2,6 +2,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+
 db = SQLAlchemy()
 
 
@@ -123,24 +124,3 @@ class Show(db.Model):
 
   def __repr__(self):
     return f'<Show {self.id}, Artist {self.artist_id}, Venue {self.venue_id}>'
-
-
-def populate():
-  import workbench
-  db.drop_all()
-  db.create_all()
-
-  for artist in workbench.artists:
-    a = Artist(**artist)
-    db.session.add(a)
-
-  for venue in workbench.venues:
-    v = Venue(**venue)
-    db.session.add(v)
-
-  for show in workbench.shows:
-    s = Show(**show)
-    db.session.add(s)
-
-  db.session.commit()
-  db.session.close()

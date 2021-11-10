@@ -1,12 +1,7 @@
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
+from wtforms.validators import DataRequired, URL, Optional, Regexp
 from datetime import datetime
-from flask_wtf import Form, FlaskForm
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
-from wtforms.validators import DataRequired, AnyOf, URL, Optional, Length, Regexp
-
-
-# read this: https://knowledge.udacity.com/questions/509897
-
-import re
+from flask_wtf import Form
 
 
 genres = [
