@@ -31,7 +31,6 @@ def format_datetime(value, format='medium'):
 
 app.jinja_env.filters['datetime'] = format_datetime
 
-
 #----------------------------------------------------------------------------#
 # Controllers.
 #----------------------------------------------------------------------------#
