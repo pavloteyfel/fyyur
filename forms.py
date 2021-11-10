@@ -112,7 +112,7 @@ class VenueForm(Form):
     )
     phone = StringField(
         'phone', validators=[DataRequired(), 
-            Regexp('\w{3}-\w{3}-\w{4}', 
+            Regexp('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', 
             message='Invalid phone number format')]
     )
     image_link = StringField(
@@ -148,7 +148,7 @@ class ArtistForm(Form):
     )
     phone = StringField(
         'phone', validators=[DataRequired(), 
-            Regexp('\w{3}-\w{3}-\w{4}', 
+            Regexp('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', 
             message='Invalid phone number format')]
     )
     image_link = StringField(
