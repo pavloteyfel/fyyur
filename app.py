@@ -75,54 +75,54 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   return render_template('pages/show_venue.html', 
-    venue=Venue.query.get(venue_id))
+    venue=Venue.query.get_or_404(venue_id))
 
 #  Create Venue
 #  ----------------------------------------------------------------
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
-  form = VenueForm()
-  return render_template('forms/new_venue.html', form=form)
+  return render_template('forms/new_venue.html', form=VenueForm())
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   form = VenueForm(request.form)
-  if form.validate():
-    try:
-      # new_venue.html: website_link renamed website to be consistent
-      venue = Venue()
-      form.populate_obj(venue)
-      db.session.add(venue)
-      db.session.commit()
-      flash(f'Venue {form.name.data} was successfully listed!')
-    except Exception as error:
-      flash(f'An error occurred. Venue {form.name.data} could not be listed.')
-      print(error)
-      db.session.rollback()
-    finally:
-      db.session.close()
-  else:
-      message = []
-      for field, err in form.errors.items():
-          message.append(field + ' ' + '|'.join(err))
-      flash('Errors ' + str(message))
+
+  if not form.validate():
+    for _, messages in form.errors.items():
+      for message in messages:
+        flash(message)
+    return render_template('forms/new_venue.html', form=form)
+
+  try:
+    venue = Venue()
+    form.populate_obj(venue)
+    db.session.add(venue)
+    db.session.commit()
+    flash(f'Venue {form.name.data} was successfully listed!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Venue {form.name.data} could not be listed.')
+    db.session.rollback()
+  finally:
+    db.session.close()
+
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  print(venue_id)
-  try:
-    venue = Venue.query.get(venue_id)
-    db.session.delete(venue)
-    db.session.commit()
-    flash(f"Venue {request.form['name']} was successfully deleted!")
-  except Exception as e:
-    print(e)
-    flash(f"An error occurred. Venue {request.form['name']} could not be deleted.")
-    db.session.rollback()
-  finally:
-    db.session.close()
+  # try:
+  #   venue = Venue.query.get(venue_id)
+  #   db.session.delete(venue)
+  #   db.session.commit()
+  #   flash(f"Venue {request.form['name']} was successfully deleted!")
+  # except Exception as e:
+  #   print(e)
+  #   flash(f"An error occurred. Venue {request.form['name']} could not be deleted.")
+
+  #   db.session.rollback()
+  # finally:
+  #   db.session.close()
   return redirect(url_for('index'))
 
 #  Artists
@@ -146,48 +146,70 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
   return render_template('pages/show_artist.html', 
-    artist=Artist.query.get(artist_id))
+    artist=Artist.query.get_or_404(artist_id))
 
 #  Update
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  artist = Artist.query.get(artist_id)
+  artist = Artist.query.get_or_404(artist_id)
   form = ArtistForm(obj=artist)
+
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  form = ArtistForm(request.form)
+  artist = Artist.query.get_or_404(artist_id)
+
+  if not form.validate():
+    for _, messages in form.errors.items():
+      for message in messages:
+        flash(message)
+    return render_template('forms/edit_artist.html', form=form, artist=artist)
+
   try:
-    artist = Artist.query.get(artist_id)
-    ArtistForm(request.form).populate_obj(artist)
+    form.populate_obj(artist)
     db.session.commit()
-    flash(f"Artist {request.form['name']} was successfully updated!")
-  except Exception as e:
-    print(e)
-    flash(f"An error occurred. Artist {request.form['name']} could not be updated.")
+    flash(f'Artist {form.name.data} was successfully updated!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Artist {form.name.data} could not be updated.')
+    db.session.rollback()
   finally:
     db.session.close()
+
   return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   venue = Venue.query.get(venue_id)
   form = VenueForm(obj=venue)
+
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  form = VenueForm(request.form)
+  venue = Venue.query.get_or_404(venue_id)
+
+  if not form.validate():
+    for _, messages in form.errors.items():
+      for message in messages:
+        flash(message)
+    return render_template('forms/edit_venue.html', form=form, venue=venue)
+
   try:
-    venue = Venue.query.get(venue_id)
-    VenueForm(request.form).populate_obj(venue)
+    form.populate_obj(venue)
     db.session.commit()
-    flash(f"Venue {request.form['name']} was successfully updated!")
-  except Exception as e:
-    print(e)
-    flash(f"An error occurred. Venue {request.form['name']} could not be updated.")
+    flash(f'Venue {form.name.data} was successfully updated!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Venue {form.name.data} could not be updated.')
+    db.session.rollback()
   finally:
     db.session.close()
+
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
@@ -199,16 +221,24 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+  form = ArtistForm(request.form)
+
+  if not form.validate():
+    for _, messages in form.errors.items():
+      for message in messages:
+        flash(message)
+    return render_template('forms/new_artist.html', form=form)
+
   try:
-    # new_artist.html: website_link renamed website to be consistent
     artist = Artist()
-    ArtistForm(request.form).populate_obj(artist)
+    form.populate_obj(artist)
     db.session.add(artist)
     db.session.commit()
-    flash(f"Artist {request.form['name']} was successfully listed!")
-  except Exception as e:
-    print(e)
-    flash(f"An error occurred. Artist {request.form['name']} could not be listed.")
+    flash(f'Artist {form.name.data} was successfully listed!')
+  except Exception as error:
+    app.logger.error(error)
+    flash(f'An error occurred. Artist {form.name.data} could not be listed.')
+    db.session.rollback()
   finally:
     db.session.close()
   return render_template('pages/home.html')
@@ -227,17 +257,27 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+  form = ShowForm(request.form)
+
+  if not form.validate():
+    for _, messages in form.errors.items():
+      for message in messages:
+        flash(message)
+    return render_template('forms/new_show.html', form=form)
+
   try:
     show = Show()
-    ShowForm(request.form).populate_obj(show)
+    form.populate_obj(show)
     db.session.add(show)
     db.session.commit()
     flash('Show was successfully listed!')
-  except Exception as e:
-    print(e)
+  except Exception as error:
+    app.logger.error(error)
     flash('An error occurred. Show could not be listed.')
+    db.session.rollback()
   finally:
     db.session.close()
+
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
@@ -252,12 +292,13 @@ def server_error(error):
 if not app.debug:
     file_handler = FileHandler('error.log')
     file_handler.setFormatter(
-        Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+        Formatter(
+          '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+          )
     )
     app.logger.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
-    app.logger.info('errors')
 
 #----------------------------------------------------------------------------#
 # Launch.

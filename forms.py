@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form, FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
-from wtforms.validators import DataRequired, AnyOf, URL, Optional
+from wtforms.validators import DataRequired, AnyOf, URL, Optional, Length, Regexp
 
 
 # read this: https://knowledge.udacity.com/questions/509897
@@ -86,18 +86,9 @@ states = [
 ]
 
 
-def is_valid_phone(number):
-    regex = re.compile('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
-    return regex.match(number)
-
-
 class ShowForm(Form):
-    artist_id = StringField(
-        'artist_id'
-    )
-    venue_id = StringField(
-        'venue_id'
-    )
+    artist_id = StringField('artist_id')
+    venue_id = StringField('venue_id')
     start_time = DateTimeField(
         'start_time',
         validators=[DataRequired()],
@@ -120,36 +111,28 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone', validators=[DataRequired()]
+        'phone', validators=[DataRequired(), 
+            Regexp('\w{3}-\w{3}-\w{4}', 
+            message='Invalid phone number format')]
     )
     image_link = StringField(
-        'image_link', validators=[URL(), Optional()]
+        'image_link', validators=[URL(message='Invalid Image Link'), 
+            Optional()]
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
         choices=genres
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL(), Optional()]
+        'Facebook Link', validators=[URL(message='Invalid Facebook Link'), 
+            Optional()]
     )
     website = StringField(
-        'website', validators=[URL(), Optional()]
+        'website', validators=[URL(message='Invalid Website Link'), 
+            Optional()]
     )
-    seeking_talent = BooleanField( 
-        'seeking_talent' 
-    )
-    seeking_description = StringField(
-        'seeking_description'
-    )
-
-
-    def validate(self):
-        if not FlaskForm.validate(self):
-            return False
-        if not is_valid_phone(self.phone.data):
-            self.phone.errors.append('Invalid phone.')
-            return False
-        return True
+    seeking_talent = BooleanField('seeking_talent')
+    seeking_description = StringField('seeking_description')
 
 
 class ArtistForm(Form):
@@ -164,25 +147,24 @@ class ArtistForm(Form):
         choices=states
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        'phone', validators=[DataRequired(), 
+            Regexp('\w{3}-\w{3}-\w{4}', 
+            message='Invalid phone number format')]
     )
     image_link = StringField(
-        'image_link', validators=[URL()]
+        'image_link', validators=[URL(message='Invalid Image Link'), 
+            Optional()]
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
         choices=genres
      )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[URL(message='Invalid Facebook Link'), 
+            Optional()]
      )
     website = StringField(
-        'website', validators=[URL()]
+        'website', validators=[URL(message='Invalid Webite Link'), Optional()]
      )
-    seeking_venue = BooleanField( 
-        'seeking_venue' 
-    )
-    seeking_description = StringField(
-        'seeking_description'
-     )
+    seeking_venue = BooleanField('seeking_venue')
+    seeking_description = StringField('seeking_description')
