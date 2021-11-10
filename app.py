@@ -211,19 +211,14 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for Hop should return "The Musical Hop".
-  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
+  search_term = request.form.get('search_term', '')
+  results = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all() 
+  response = {
+    "count": len(results),
+    "data": [{'id': result.id, 'name': result.name} for result in results],
   }
   return render_template('pages/search_venues.html', 
-    results=response, search_term=request.form.get('search_term', ''))
+    results=response, search_term=search_term)
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -242,8 +237,9 @@ def create_venue_form():
 def create_venue_submission():
   try:
     # new_venue.html: website_link renamed website to be consistent
-    form_data = VenueForm(request.form).to_dict()
-    db.session.add(Venue(**form_data))
+    venue = Venue()
+    VenueForm(request.form).populate_obj(venue)
+    db.session.add(venue)
     db.session.commit()
     flash(f"Venue {request.form['name']} was successfully listed!")
   except Exception as e:
@@ -255,12 +251,19 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  print(venue_id)
+  try:
+    venue = Venue.query.get(venue_id)
+    db.session.delete(venue)
+    db.session.commit()
+    flash(f"Venue {request.form['name']} was successfully deleted!")
+  except Exception as e:
+    print(e)
+    flash(f"An error occurred. Venue {request.form['name']} could not be deleted.")
+    db.session.rollback()
+  finally:
+    db.session.close()
+  return redirect(url_for('index'))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -271,18 +274,14 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-  # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
+  search_term = request.form.get('search_term', '')
+  results = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all() 
+  response = {
+    "count": len(results),
+    "data": [{'id': result.id, 'name': result.name} for result in results],
   }
-  return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+  return render_template('pages/search_artists.html', results=response, 
+    search_term=search_term)
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
@@ -301,8 +300,7 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   try:
     artist = Artist.query.get(artist_id)
-    form_data = ArtistForm(request.form).to_dict()
-    artist.update(form_data)
+    ArtistForm(request.form).populate_obj(artist)
     db.session.commit()
     flash(f"Artist {request.form['name']} was successfully updated!")
   except Exception as e:
@@ -310,7 +308,6 @@ def edit_artist_submission(artist_id):
     flash(f"An error occurred. Artist {request.form['name']} could not be updated.")
   finally:
     db.session.close()
-
   return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
@@ -323,8 +320,7 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   try:
     venue = Venue.query.get(venue_id)
-    form_data = VenueForm(request.form).to_dict()
-    venue.update(form_data)
+    VenueForm(request.form).populate_obj(venue)
     db.session.commit()
     flash(f"Venue {request.form['name']} was successfully updated!")
   except Exception as e:
@@ -345,8 +341,9 @@ def create_artist_form():
 def create_artist_submission():
   try:
     # new_artist.html: website_link renamed website to be consistent
-    form_data = ArtistForm(request.form).to_dict()
-    db.session.add(Artist(**form_data))
+    artist = Artist()
+    ArtistForm(request.form).populate_obj(artist)
+    db.session.add(artist)
     db.session.commit()
     flash(f"Artist {request.form['name']} was successfully listed!")
   except Exception as e:
@@ -371,8 +368,9 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   try:
-    form_data = ShowForm(request.form).to_dict()
-    db.session.add(Show(**form_data))
+    show = Show()
+    ShowForm(request.form).populate_obj(show)
+    db.session.add(show)
     db.session.commit()
     flash('Show was successfully listed!')
   except Exception as e:

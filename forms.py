@@ -1,7 +1,12 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, AnyOf, URL
+
+
+# read this: https://knowledge.udacity.com/questions/509897
+
+import re
 
 
 genres = [
@@ -80,13 +85,12 @@ states = [
     ('WY', 'WY'),
 ]
 
-class FormToDict:
-    def to_dict(self):
-        return {field:getattr(getattr(self, field), 'data') 
-            for field in dict(self._fields).keys()}
 
+def validate_phone(form, field):
+    if not re.search(r'^[1-9]\d{2}-\d{3}-\d{4}$', field.data):
+        raise ValidationError("error: Phone number should only contain digits (xxx-xxx-xxxx)")
 
-class ShowForm(Form, FormToDict):
+class ShowForm(Form):
     artist_id = StringField(
         'artist_id'
     )
@@ -100,7 +104,7 @@ class ShowForm(Form, FormToDict):
     )
 
 
-class VenueForm(Form, FormToDict):
+class VenueForm(Form):
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -115,7 +119,7 @@ class VenueForm(Form, FormToDict):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[DataRequired(), validate_phone]
     )
     image_link = StringField(
         'image_link', validators=[URL()]
@@ -138,7 +142,7 @@ class VenueForm(Form, FormToDict):
     )
 
 
-class ArtistForm(Form, FormToDict):
+class ArtistForm(Form):
     name = StringField(
         'name', validators=[DataRequired()]
     )
