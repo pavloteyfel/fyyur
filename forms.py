@@ -82,13 +82,9 @@ states = [
 
 
 class ShowForm(Form):
-    artist_id = StringField('artist_id')
-    venue_id = StringField('venue_id')
-    start_time = DateTimeField(
-        'start_time',
-        validators=[DataRequired()],
-        default=datetime.today()
-    )
+    artist_id = SelectField('artist_id', validate_choice=False, choices=[])
+    venue_id = SelectField('venue_id', validate_choice=False, choices=[])
+    start_time = DateTimeField('start_time', default=datetime.today())
 
 
 class VenueForm(Form):
@@ -107,12 +103,12 @@ class VenueForm(Form):
     )
     phone = StringField(
         'phone', validators=[DataRequired(), 
-            Regexp('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', 
+            Regexp('^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$',
             message='Invalid phone number format')]
     )
     image_link = StringField(
         'image_link', validators=[URL(message='Invalid Image Link'), 
-            Optional()]
+            Optional()], default='https://placeimg.com/640/480/arch'
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
@@ -120,7 +116,7 @@ class VenueForm(Form):
     )
     facebook_link = StringField(
         'Facebook Link', validators=[URL(message='Invalid Facebook Link'), 
-            Optional()]
+            Optional()], default='https://facebook.com'
     )
     website = StringField(
         'website', validators=[URL(message='Invalid Website Link'), 
@@ -143,12 +139,12 @@ class ArtistForm(Form):
     )
     phone = StringField(
         'phone', validators=[DataRequired(), 
-            Regexp('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', 
+            Regexp('^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$', 
             message='Invalid phone number format')]
     )
     image_link = StringField(
         'image_link', validators=[URL(message='Invalid Image Link'), 
-            Optional()]
+            Optional()], default='https://placeimg.com/640/480/people/sepia'
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
@@ -156,10 +152,10 @@ class ArtistForm(Form):
      )
     facebook_link = StringField(
         'facebook_link', validators=[URL(message='Invalid Facebook Link'), 
-            Optional()]
+            Optional()], default='https://facebook.com'
      )
     website = StringField(
-        'website', validators=[URL(message='Invalid Webite Link'), Optional()]
+        'website', validators=[URL(message='Invalid Website Link'), Optional()]
      )
     seeking_venue = BooleanField('seeking_venue')
     seeking_description = StringField('seeking_description')

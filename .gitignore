@@ -1,5 +1,5 @@
-__pycache__/*
-node_modules/*
+__pycache__
+node_modules
 package-lock.json
 package.json
 error.log
@@ -7,3 +7,5 @@ workbench.py
 todo.md
 error.log
 migrations/__pycache__/*
+.idea
+venv
