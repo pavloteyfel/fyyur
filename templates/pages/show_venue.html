@@ -77,6 +77,7 @@
 
 <a href="/venues/{{ venue.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
 <form class="form-button">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="submit"
            value="Delete"
            class="btn btn-danger btn-lg"
