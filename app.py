@@ -72,7 +72,7 @@ def venues():
             'venues': [{
                 'id': venue.id,
                 'name': venue.name,
-                'num_upcoming_shows': venue.upcoming_shows_count,
+                'upcoming_shows_count': venue.upcoming_shows_count,
             } for venue in venues if venue.city == place.city
                                      and venue.state == place.state]
         })
@@ -84,8 +84,12 @@ def search_venues():
     search_term = request.form.get('search_term', '')
     results = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
     response = {
-        "count": len(results),
-        "data": [{'id': result.id, 'name': result.name} for result in results],
+        'count': len(results),
+        'data': [{
+            'id': result.id, 
+            'name': result.name,
+            'upcoming_shows_count': result.upcoming_shows_count,
+            } for result in results],
     }
     return render_template('pages/search_venues.html',
                            results=response, search_term=search_term)
@@ -207,7 +211,11 @@ def search_artists():
     results = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
     response = {
         "count": len(results),
-        "data": [{'id': result.id, 'name': result.name} for result in results],
+        "data": [{
+            'id': result.id, 
+            'name': result.name,
+            'upcoming_shows_count': result.upcoming_shows_count,
+            } for result in results]
     }
     return render_template('pages/search_artists.html', results=response,
                            search_term=search_term)
