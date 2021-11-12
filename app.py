@@ -1,9 +1,16 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
 from forms import ArtistForm, VenueForm, ShowForm
 from logging import Formatter, FileHandler
 from model import db, Artist, Venue, Show
 from flask_migrate import Migrate
 from flask_moment import Moment
+from flask import (
+    Flask,
+    render_template,
+    request,
+    flash,
+    redirect,
+    url_for
+)
 
 import dateutil.parser
 import logging
@@ -65,6 +72,7 @@ def venues():
             'venues': [{
                 'id': venue.id,
                 'name': venue.name,
+                'num_upcoming_shows': venue.upcoming_shows_count,
             } for venue in venues if venue.city == place.city
                                      and venue.state == place.state]
         })
