@@ -1,7 +1,7 @@
 from forms import ArtistForm, VenueForm, ShowForm
 from logging import Formatter, FileHandler
 from model import db, Artist, Venue, Show
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask import (
@@ -384,6 +384,11 @@ def not_found_error(error):
 @app.errorhandler(500)
 def server_error(error):
     return render_template('errors/500.html'), 500
+
+
+@app.errorhandler(CSRFError)
+def server_error(error):
+    return render_template('errors/csrf.html'), 400
 
 
 if not app.debug:

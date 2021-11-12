@@ -9,3 +9,4 @@ error.log
 migrations/__pycache__/*
 .idea
 venv
+.git
