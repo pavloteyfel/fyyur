@@ -1,3 +1,5 @@
+"""Application configuration file"""
+
 import os
 
 

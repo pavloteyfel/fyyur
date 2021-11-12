@@ -51,7 +51,13 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
-    # Shows recently listed Artists and Venues
+    """
+    App's main entry point
+
+    Returns:
+        on GET: Lists recently listed Artists and Venues
+    """
+
     artists = Artist.query.order_by(Artist.id.desc()).limit(10).all()
     venues = Venue.query.order_by(Venue.id.desc()).limit(10).all()
 
@@ -64,6 +70,10 @@ def index():
 
 @app.route('/venues')
 def venues():
+    """
+    Shows available venues grouped by place.
+    """
+
     venues = Venue.query.all()
     places = Venue.query.distinct(Venue.city, Venue.state).all()
     areas = []
@@ -83,6 +93,16 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+    """
+    Seach function called from venues page.
+
+    Args:
+        search_term: Used in the venue's name
+    
+    Returns:
+        on POST: Searches for venues and lists found entries.
+    """
+
     search_term = request.form.get('search_term', '')
     results = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
     response = {
@@ -99,6 +119,15 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
+    """
+    Loads venue's page.
+
+    Args:
+        venue_id: Venue identifier.
+
+    Returns:
+        on GET: Shows venue's detailed page based on the id.
+    """
     return render_template('pages/show_venue.html',
                            venue=Venue.query.get_or_404(venue_id))
 
@@ -109,11 +138,17 @@ def show_venue(venue_id):
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
+    """
+    Loads form page for creating a new venue.
+    """
     return render_template('forms/new_venue.html', form=VenueForm())
 
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    """
+    Handles the form for submission. Applies form validation.
+    """
     form = VenueForm(request.form)
 
     if not form.validate():
@@ -144,6 +179,15 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['POST'])
 def delete_venue(venue_id):
+    """
+    Completely deletes venue from database.
+
+    Args:
+        venue_id: Venue identifier.
+
+    Returns:
+        on POST: Deletes venue row from database.
+    """
     venue = Venue.query.get_or_404(venue_id)
 
     try:
@@ -166,6 +210,9 @@ def delete_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+    """
+    Loads venue form page for modification.
+    """
     venue = Venue.query.get(venue_id)
     form = VenueForm(obj=venue)
 
@@ -173,7 +220,11 @@ def edit_venue(venue_id):
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
+
 def edit_venue_submission(venue_id):
+    """
+    Handles the form for modification. Applies form validation.
+    """
     form = VenueForm(request.form)
     venue = Venue.query.get_or_404(venue_id)
 
@@ -203,12 +254,27 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists')
 def artists():
+    """
+    Shows available artists.
+
+    Returns:
+        on GET: Lists all artists from the database
+    """
     return render_template('pages/artists.html',
                            artists=Artist.query.all())
 
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
+    """
+    Seach function called from artist page.
+
+    Args:
+        search_term: Used in the artist's name
+    
+    Returns:
+        on POST: Searches for artist and lists found entries.
+    """
     search_term = request.form.get('search_term', '')
     results = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
     response = {
@@ -225,6 +291,15 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
+    """
+    Loads artist's page.
+
+    Args:
+        artist_id: Venue identifier.
+
+    Returns:
+        on GET: Shows artist's detailed page based on the id.
+    """
     return render_template('pages/show_artist.html',
                            artist=Artist.query.get_or_404(artist_id))
 
@@ -235,11 +310,17 @@ def show_artist(artist_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
+    """
+    Loads form page for creating a new artist.
+    """
     return render_template('forms/new_artist.html', form=ArtistForm())
 
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    """
+    Handles the form for submission. Applies form validation.
+    """
     form = ArtistForm(request.form)
 
     if not form.validate():
@@ -269,6 +350,15 @@ def create_artist_submission():
 
 @app.route('/artists/<artist_id>', methods=['POST'])
 def delete_artist(artist_id):
+    """
+    Completely deletes artist from database.
+
+    Args:
+        artist_id: Artist identifier.
+
+    Returns:
+        on POST: Deletes artist row from database.
+    """
     artist = Artist.query.get_or_404(artist_id)
 
     try:
@@ -291,6 +381,12 @@ def delete_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+    """
+    Handles the form for submission. Applies form validation.
+
+    Args:
+        artist_id: Artist identifier.
+    """
     artist = Artist.query.get_or_404(artist_id)
     form = ArtistForm(obj=artist)
 
@@ -299,6 +395,12 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+    """
+    Handles the form for submission. Applies form validation.
+
+    Args:
+        artist_id: Artist identifier.
+    """
     form = ArtistForm(request.form)
     artist = Artist.query.get_or_404(artist_id)
 
@@ -328,6 +430,9 @@ def edit_artist_submission(artist_id):
 
 @app.route('/shows')
 def shows():
+    """
+    Shows available shows.
+    """
     return render_template('pages/shows.html', shows=Show.query.all())
 
 
@@ -337,7 +442,10 @@ def shows():
 
 @app.route('/shows/create')
 def create_shows():
-    # Dropdown lists for show creation
+    """
+    Prepares the form for submission. Applies form validation. Uses drop-down
+    list to get the artist_id and vernue_id.
+    """
     form = ShowForm()
     artists = Artist.query.order_by(Artist.id).all()
     venues = Venue.query.order_by(Venue.id).all()
@@ -348,6 +456,9 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+    """
+    Handles the form for submission. Applies form validation.
+    """
     form = ShowForm(request.form)
 
     if not form.validate():
@@ -378,16 +489,25 @@ def create_show_submission():
 
 @app.errorhandler(404)
 def not_found_error(error):
+    """
+    Client related reposnse error page.
+    """
     return render_template('errors/404.html'), 404
 
 
 @app.errorhandler(500)
 def server_error(error):
+    """
+    Server related response error page.
+    """
     return render_template('errors/500.html'), 500
 
 
 @app.errorhandler(CSRFError)
 def server_error(error):
+    """
+    Shows error if CSRF token is missing.
+    """
     return render_template('errors/csrf.html'), 400
 
 

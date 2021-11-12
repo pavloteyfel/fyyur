@@ -1,3 +1,5 @@
+"""Venue, Artist and Show related form fields and validation rules."""
+
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
 from wtforms.validators import DataRequired, URL, Optional, Regexp
 from flask_wtf import FlaskForm
@@ -25,12 +27,18 @@ def is_valid_phone(number):
 
 
 class ShowForm(FlaskForm):
+    """
+    All show page form fields and related validation rules.
+    """
     artist_id = SelectField('artist_id', validate_choice=False, choices=[])
     venue_id = SelectField('venue_id', validate_choice=False, choices=[])
     start_time = DateTimeField('start_time', default=datetime.today())
 
 
 class VenueForm(FlaskForm):
+    """
+    All venue page form fields and related validation rules.
+    """
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -67,7 +75,7 @@ class VenueForm(FlaskForm):
     seeking_description = StringField('seeking_description')
 
     def validate(self):
-        """Define a custom validate method in your Form"""
+        """Custom validate method for phone, genre and state"""
         rv = FlaskForm.validate(self)
         if not rv:
             return False
@@ -84,6 +92,9 @@ class VenueForm(FlaskForm):
 
 
 class ArtistForm(FlaskForm):
+    """
+    Artist page form fields and related validation rules.
+    """
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -116,7 +127,7 @@ class ArtistForm(FlaskForm):
     seeking_description = StringField('seeking_description')
 
     def validate(self):
-        """Define a custom validate method in your Form"""
+        """Custom validate method for phone, genre and state"""
         rv = FlaskForm.validate(self)
         if not rv:
             return False

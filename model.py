@@ -1,3 +1,11 @@
+"""
+Data model representation of the appliation:
+    - Artist
+    - Venue:
+    - Show:
+
+"""
+
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -6,6 +14,7 @@ db = SQLAlchemy()
 
 
 class Venue(db.Model):
+    """Venue data model connected to artist model through Show model"""
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -39,15 +48,12 @@ class Venue(db.Model):
     def past_shows_count(self):
         return len(self.past_shows)
 
-    def update(self, data):
-        for key, value in data.items():
-            setattr(self, key, value)
-
     def __repr__(self):
         return f'<Venue {self.id}, {self.name}>'
 
 
 class Artist(db.Model):
+    """Artist data model connected to venue model through Show model"""
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -80,15 +86,12 @@ class Artist(db.Model):
     def past_shows_count(self):
         return len(self.past_shows)
 
-    def update(self, data):
-        for key, value in data.items():
-            setattr(self, key, value)
-
     def __repr__(self):
         return f'<Artist {self.id}, {self.name}>'
 
 
 class Show(db.Model):
+    """Connecting model for Artist and Venue models"""
     __tablename__ = 'Show'
 
     id = db.Column(db.Integer, primary_key=True)
