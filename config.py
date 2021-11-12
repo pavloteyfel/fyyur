@@ -3,6 +3,9 @@ import os
 
 SECRET_KEY = os.urandom(32)
 
+# CSRF protection configuration
+WTF_CSRF_ENABLED = True
+
 # Grabs the folder where the script runs.
 basedir = os.path.abspath(os.path.dirname(__file__))
 

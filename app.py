@@ -1,6 +1,7 @@
 from forms import ArtistForm, VenueForm, ShowForm
 from logging import Formatter, FileHandler
 from model import db, Artist, Venue, Show
+from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask import (
@@ -23,6 +24,7 @@ import babel
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
+csrf = CSRFProtect(app)
 db.init_app(app)
 migrate = Migrate(app, db)
 
