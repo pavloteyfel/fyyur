@@ -16,11 +16,13 @@ Fyyur is a musical venue and artist booking site that facilitates the discovery 
 
 Download and install the dependencies mentioned above using `pip` as:
 ```
-pip install virtualenv
-pip install SQLAlchemy
-pip install postgres
-pip install Flask
+pip install Flask-Moment
+pip install Flask-SQLAlchemy
+pip install Flask-WTF
+pip install Babel
+pip install python-dateutil
 pip install Flask-Migrate
+pip install psycopg2-binary
 ```
 
 
