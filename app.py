@@ -94,11 +94,8 @@ def venues():
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
     """
-    Seach function called from venues page.
+    Search function called from venues page.
 
-    Args:
-        search_term: Used in the venue's name
-    
     Returns:
         on POST: Searches for venues and lists found entries.
     """
@@ -220,7 +217,6 @@ def edit_venue(venue_id):
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
-
 def edit_venue_submission(venue_id):
     """
     Handles the form for modification. Applies form validation.
@@ -267,11 +263,8 @@ def artists():
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
     """
-    Seach function called from artist page.
+    Search function called from artist page.
 
-    Args:
-        search_term: Used in the artist's name
-    
     Returns:
         on POST: Searches for artist and lists found entries.
     """
@@ -444,7 +437,7 @@ def shows():
 def create_shows():
     """
     Prepares the form for submission. Applies form validation. Uses drop-down
-    list to get the artist_id and vernue_id.
+    list to get the artist_id and venue_id.
     """
     form = ShowForm()
     artists = Artist.query.order_by(Artist.id).all()
@@ -490,8 +483,9 @@ def create_show_submission():
 @app.errorhandler(404)
 def not_found_error(error):
     """
-    Client related reposnse error page.
+    Client related response error page.
     """
+    app.logger.error(error)
     return render_template('errors/404.html'), 404
 
 
@@ -500,6 +494,7 @@ def server_error(error):
     """
     Server related response error page.
     """
+    app.logger.error(error)
     return render_template('errors/500.html'), 500
 
 
@@ -508,6 +503,7 @@ def server_error(error):
     """
     Shows error if CSRF token is missing.
     """
+    app.logger.error(error)
     return render_template('errors/csrf.html'), 400
 
 
