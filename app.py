@@ -86,7 +86,7 @@ def venues():
                 'name': venue.name,
                 'upcoming_shows_count': venue.upcoming_shows_count,
             } for venue in venues if venue.city == place.city
-                                     and venue.state == place.state]
+                and venue.state == place.state]
         })
     return render_template('pages/venues.html', areas=areas)
 
@@ -105,10 +105,10 @@ def search_venues():
     response = {
         'count': len(results),
         'data': [{
-            'id': result.id, 
+            'id': result.id,
             'name': result.name,
             'upcoming_shows_count': result.upcoming_shows_count,
-            } for result in results],
+        } for result in results],
     }
     return render_template('pages/search_venues.html',
                            results=response, search_term=search_term)
@@ -162,7 +162,8 @@ def create_venue_submission():
         flash(f'Venue {form.name.data} was successfully listed!')
     except Exception as error:
         app.logger.error(error)
-        flash(f'An error occurred. Venue {form.name.data} could not be listed.')
+        flash(
+            f'An error occurred. Venue {form.name.data} could not be listed.')
         db.session.rollback()
     finally:
         db.session.close()
@@ -236,7 +237,8 @@ def edit_venue_submission(venue_id):
         flash(f'Venue {form.name.data} was successfully updated!')
     except Exception as error:
         app.logger.error(error)
-        flash(f'An error occurred. Venue {form.name.data} could not be updated.')
+        flash(
+            f'An error occurred. Venue {form.name.data} could not be updated.')
         db.session.rollback()
     finally:
         db.session.close()
@@ -273,10 +275,10 @@ def search_artists():
     response = {
         "count": len(results),
         "data": [{
-            'id': result.id, 
+            'id': result.id,
             'name': result.name,
             'upcoming_shows_count': result.upcoming_shows_count,
-            } for result in results]
+        } for result in results]
     }
     return render_template('pages/search_artists.html', results=response,
                            search_term=search_term)
@@ -330,7 +332,8 @@ def create_artist_submission():
         flash(f'Artist {form.name.data} was successfully listed!')
     except Exception as error:
         app.logger.error(error)
-        flash(f'An error occurred. Artist {form.name.data} could not be listed.')
+        flash(
+            f'An error occurred. Artist {form.name.data} could not be listed.')
         db.session.rollback()
     finally:
         db.session.close()
@@ -401,7 +404,10 @@ def edit_artist_submission(artist_id):
         for _, messages in form.errors.items():
             for message in messages:
                 flash(message)
-        return render_template('forms/edit_artist.html', form=form, artist=artist)
+        return render_template(
+            'forms/edit_artist.html',
+            form=form,
+            artist=artist)
 
     try:
         form.populate_obj(artist)
@@ -409,7 +415,8 @@ def edit_artist_submission(artist_id):
         flash(f'Artist {form.name.data} was successfully updated!')
     except Exception as error:
         app.logger.error(error)
-        flash(f'An error occurred. Artist {form.name.data} could not be updated.')
+        flash(
+            f'An error occurred. Artist {form.name.data} could not be updated.')
         db.session.rollback()
     finally:
         db.session.close()

@@ -1,8 +1,8 @@
 """
 Data model representation of the appliation:
     - Artist
-    - Venue:
-    - Show:
+    - Venue
+    - Show
 
 """
 
