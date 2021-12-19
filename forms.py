@@ -1,10 +1,16 @@
 """Venue, Artist and Show related form fields and validation rules."""
 
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, URL, Optional, Regexp
+from wtforms.validators import DataRequired, URL, Optional
 from flask_wtf import FlaskForm
 from enums import Genre, State
 from datetime import datetime
+from wtforms import (
+    StringField, 
+    SelectField, 
+    SelectMultipleField, 
+    DateTimeField, 
+    BooleanField)
+
 import re
 
 
