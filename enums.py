@@ -1,5 +1,3 @@
-"""Enums for Genre and State used by Venue and Artist submit and edit forms"""
-
 import enum
 
 

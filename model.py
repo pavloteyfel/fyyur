@@ -1,11 +1,3 @@
-"""
-Data model representation of the appliation:
-    - Artist
-    - Venue
-    - Show
-
-"""
-
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -34,11 +26,13 @@ class Venue(db.Model):
 
     @hybrid_property
     def upcoming_shows(self):
-        return [show for show in self.shows if show._start_time > datetime.now()]
+        return [show for show in self.shows
+                if show._start_time > datetime.now()]
 
     @hybrid_property
     def past_shows(self):
-        return [show for show in self.shows if show._start_time < datetime.now()]
+        return [show for show in self.shows
+                if show._start_time < datetime.now()]
 
     @hybrid_property
     def upcoming_shows_count(self):
@@ -72,11 +66,13 @@ class Artist(db.Model):
 
     @hybrid_property
     def upcoming_shows(self):
-        return [show for show in self.shows if show._start_time > datetime.now()]
+        return [show for show in self.shows
+                if show._start_time > datetime.now()]
 
     @hybrid_property
     def past_shows(self):
-        return [show for show in self.shows if show._start_time < datetime.now()]
+        return [show for show in self.shows
+                if show._start_time < datetime.now()]
 
     @hybrid_property
     def upcoming_shows_count(self):
@@ -95,8 +91,12 @@ class Show(db.Model):
     __tablename__ = 'Show'
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(
+        db.Integer,
+        db.ForeignKey('Artist.id'),
+        nullable=False)
+    venue_id = db.Column(db.Integer,
+                         db.ForeignKey('Venue.id'), nullable=False)
     _start_time = db.Column(db.DateTime, nullable=False)
     artist = db.relationship('Artist', back_populates='shows')
     venue = db.relationship('Venue', back_populates='shows')
@@ -110,4 +110,5 @@ class Show(db.Model):
         self._start_time = value
 
     def __repr__(self):
-        return f'<Show {self.id}, Artist {self.artist_id}, Venue {self.venue_id}>'
+        return f'<Show {self.id}, Artist {self.artist_id}, \
+            Venue {self.venue_id}>'

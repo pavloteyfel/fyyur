@@ -1,5 +1,3 @@
-"""Venue, Artist and Show related form fields and validation rules."""
-
 from wtforms.validators import DataRequired, URL, Optional
 from flask_wtf import FlaskForm
 from enums import Genre, State

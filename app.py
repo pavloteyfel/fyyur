@@ -33,13 +33,13 @@ migrate = Migrate(app, db)
 # Filters.
 # ----------------------------------------------------------------------------#
 
-def format_datetime(value, format='medium'):
+def format_datetime(value, format_='medium'):
     date = dateutil.parser.parse(value)
-    if format == 'full':
-        format = "EEEE MMMM, d, y 'at' h:mma"
-    elif format == 'medium':
-        format = "EE MM, dd, y h:mma"
-    return babel.dates.format_datetime(date, format, locale='en')
+    if format_ == 'full':
+        format_ = "EEEE MMMM, d, y 'at' h:mma"
+    elif format_ == 'medium':
+        format_ = "EE MM, dd, y h:mma"
+    return babel.dates.format_datetime(date, format_, locale='en')
 
 
 app.jinja_env.filters['datetime'] = format_datetime
@@ -524,11 +524,3 @@ if not app.debug:
     app.logger.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
-
-# ----------------------------------------------------------------------------#
-# Launch.
-# ----------------------------------------------------------------------------#
-
-
-if __name__ == '__main__':
-    app.run()
