@@ -1,6 +1,7 @@
 from forms import ArtistForm, VenueForm, ShowForm
 from logging import Formatter, FileHandler
 from model import db, Artist, Venue, Show
+from sqlalchemy.exc import SQLAlchemyError
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_migrate import Migrate
 from flask_moment import Moment
@@ -167,7 +168,7 @@ def create_venue_submission():
         db.session.add(venue)
         db.session.commit()
         flash(f"Venue {form.name.data} was successfully listed!")
-    except Exception as error:
+    except SQLAlchemyError as error:
         app.logger.error(error)
         flash(f"An error occurred. Venue {form.name.data} could not be listed.")
         db.session.rollback()
@@ -199,7 +200,7 @@ def delete_venue(venue_id):
         db.session.delete(venue)
         db.session.commit()
         flash(f"Venue {venue.name} was successfully deleted!")
-    except Exception as error:
+    except SQLAlchemyError as error:
         app.logger.error(error)
         flash(f"An error occurred. Venue {venue.name} could not be deleted.")
         db.session.rollback()
