@@ -7,7 +7,8 @@ db = SQLAlchemy()
 
 class Venue(db.Model):
     """Venue data model connected to artist model through Show model"""
-    __tablename__ = 'Venue'
+
+    __tablename__ = "Venue"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -21,18 +22,17 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', back_populates='venue',
-                            cascade='all, delete', lazy='joined')
+    shows = db.relationship(
+        "Show", back_populates="venue", cascade="all, delete", lazy="joined"
+    )
 
     @hybrid_property
     def upcoming_shows(self):
-        return [show for show in self.shows
-                if show._start_time > datetime.now()]
+        return [show for show in self.shows if show._start_time > datetime.now()]
 
     @hybrid_property
     def past_shows(self):
-        return [show for show in self.shows
-                if show._start_time < datetime.now()]
+        return [show for show in self.shows if show._start_time < datetime.now()]
 
     @hybrid_property
     def upcoming_shows_count(self):
@@ -43,12 +43,13 @@ class Venue(db.Model):
         return len(self.past_shows)
 
     def __repr__(self):
-        return f'<Venue {self.id}, {self.name}>'
+        return f"<Venue {self.id}, {self.name}>"
 
 
 class Artist(db.Model):
     """Artist data model connected to venue model through Show model"""
-    __tablename__ = 'Artist'
+
+    __tablename__ = "Artist"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -61,18 +62,17 @@ class Artist(db.Model):
     website = db.Column(db.String(500))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', back_populates='artist',
-                            cascade='all, delete', lazy='joined')
+    shows = db.relationship(
+        "Show", back_populates="artist", cascade="all, delete", lazy="joined"
+    )
 
     @hybrid_property
     def upcoming_shows(self):
-        return [show for show in self.shows
-                if show._start_time > datetime.now()]
+        return [show for show in self.shows if show._start_time > datetime.now()]
 
     @hybrid_property
     def past_shows(self):
-        return [show for show in self.shows
-                if show._start_time < datetime.now()]
+        return [show for show in self.shows if show._start_time < datetime.now()]
 
     @hybrid_property
     def upcoming_shows_count(self):
@@ -83,32 +83,29 @@ class Artist(db.Model):
         return len(self.past_shows)
 
     def __repr__(self):
-        return f'<Artist {self.id}, {self.name}>'
+        return f"<Artist {self.id}, {self.name}>"
 
 
 class Show(db.Model):
     """Connecting model for Artist and Venue models"""
-    __tablename__ = 'Show'
+
+    __tablename__ = "Show"
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(
-        db.Integer,
-        db.ForeignKey('Artist.id'),
-        nullable=False)
-    venue_id = db.Column(db.Integer,
-                         db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
     _start_time = db.Column(db.DateTime, nullable=False)
-    artist = db.relationship('Artist', back_populates='shows')
-    venue = db.relationship('Venue', back_populates='shows')
+    artist = db.relationship("Artist", back_populates="shows")
+    venue = db.relationship("Venue", back_populates="shows")
 
     @property
     def start_time(self):
-        return self._start_time.strftime('%Y-%m-%d %H:%M:%S')
+        return self._start_time.strftime("%Y-%m-%d %H:%M:%S")
 
     @start_time.setter
     def start_time(self, value):
         self._start_time = value
 
     def __repr__(self):
-        return f'<Show {self.id}, Artist {self.artist_id}, \
-            Venue {self.venue_id}>'
+        return f"<Show {self.id}, Artist {self.artist_id}, \
+            Venue {self.venue_id}>"
