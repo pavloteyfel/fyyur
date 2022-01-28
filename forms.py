@@ -48,7 +48,8 @@ class VenueForm(FlaskForm):
 
     name = StringField("name", validators=[DataRequired()])
     city = StringField("city", validators=[DataRequired()])
-    state = SelectField("state", validators=[DataRequired()], choices=State.choices())
+    state = SelectField("state", validators=[
+                        DataRequired()], choices=State.choices())
     address = StringField("address", validators=[DataRequired()])
     phone = StringField("phone", validators=[DataRequired()])
     image_link = StringField(
@@ -94,7 +95,8 @@ class ArtistForm(FlaskForm):
 
     name = StringField("name", validators=[DataRequired()])
     city = StringField("city", validators=[DataRequired()])
-    state = SelectField("state", validators=[DataRequired()], choices=State.choices())
+    state = SelectField("state", validators=[
+                        DataRequired()], choices=State.choices())
     phone = StringField("phone", validators=[DataRequired()])
     image_link = StringField(
         "image_link",
