@@ -170,7 +170,8 @@ def create_venue_submission():
         flash(f"Venue {form.name.data} was successfully listed!")
     except SQLAlchemyError as error:
         app.logger.error(error)
-        flash(f"An error occurred. Venue {form.name.data} could not be listed.")
+        flash(
+            f"An error occurred. Venue {form.name.data} could not be listed.")
         db.session.rollback()
     finally:
         db.session.close()
@@ -246,7 +247,8 @@ def edit_venue_submission(venue_id):
         flash(f"Venue {form.name.data} was successfully updated!")
     except Exception as error:
         app.logger.error(error)
-        flash(f"An error occurred. Venue {form.name.data} could not be updated.")
+        flash(
+            f"An error occurred. Venue {form.name.data} could not be updated.")
         db.session.rollback()
     finally:
         db.session.close()
@@ -346,7 +348,8 @@ def create_artist_submission():
         flash(f"Artist {form.name.data} was successfully listed!")
     except Exception as error:
         app.logger.error(error)
-        flash(f"An error occurred. Artist {form.name.data} could not be listed.")
+        flash(
+            f"An error occurred. Artist {form.name.data} could not be listed.")
         db.session.rollback()
     finally:
         db.session.close()
@@ -427,7 +430,8 @@ def edit_artist_submission(artist_id):
         flash(f"Artist {form.name.data} was successfully updated!")
     except Exception as error:
         app.logger.error(error)
-        flash(f"An error occurred. Artist {form.name.data} could not be updated.")
+        flash(
+            f"An error occurred. Artist {form.name.data} could not be updated.")
         db.session.rollback()
     finally:
         db.session.close()
@@ -531,7 +535,8 @@ def server_error(error):
 if not app.debug:
     file_handler = FileHandler("error.log")
     file_handler.setFormatter(
-        Formatter("%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]")
+        Formatter(
+            "%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]")
     )
     app.logger.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)
