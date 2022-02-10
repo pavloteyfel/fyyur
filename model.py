@@ -2,6 +2,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+
 db = SQLAlchemy()
 
 
@@ -92,7 +93,8 @@ class Show(db.Model):
     __tablename__ = "Show"
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey(
+        "Artist.id"), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
     _start_time = db.Column(db.DateTime, nullable=False)
     artist = db.relationship("Artist", back_populates="shows")
